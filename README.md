@@ -125,6 +125,9 @@ When you run the command above, a window titled RTAB-Map Viz will open.
 
 **Terminal 3: Record to MCAP**
 Saves all data to a compressed MCAP file to prevent frame drops.
+
++ For ```.bash``` terminals.
+
 ```bash
 ros2 bag record -s mcap \
   --storage-config-file <(echo "compression: 'Zstd'") \
@@ -136,6 +139,26 @@ ros2 bag record -s mcap \
   /tf_static \
   -o my_realsense_session
 ```
+
++ For ```.zsh``` terminals.
+
+```bash
+# First, create the config file
+echo "compression: 'Zstd'" > mcap_config.yaml
+
+# Then run the record command
+ros2 bag record -s mcap \
+  --storage-config-file mcap_config.yaml \
+  /camera/camera/color/image_raw \
+  /camera/camera/aligned_depth_to_color/image_raw \
+  /camera/camera/color/camera_info \
+  /camera/camera/imu \
+  /rtabmap/odom \
+  /tf \
+  /tf_static \
+  -o my_realsense_session
+```
+
 Stop recording with ```Ctrl+C```.
 
 <br>  
