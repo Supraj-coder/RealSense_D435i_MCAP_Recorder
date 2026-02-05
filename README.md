@@ -192,9 +192,10 @@ ros2 bag play my_realsense_session
 ## Important Troubleshooting
 
 1. **USB 3.0 Requirement:** The D435i requires a high-bandwidth USB 3.0 port. Use ```rs-enumerate-devices``` to confirm "USB Type" is 3.2.
-2. **SLAM Tracking:** Visual Odometry (SLAM) requires distinct 'features' to track. Avoid pointing the camera at blank white walls or dark corners, as this will cause the ```/rtabmap/odom``` topic to stop publishing.
-3. **Hardware Sync:** If frames are out of sync, ensure ```enable_sync:=true``` is set in Terminal 1.
-4. **Note on Performance:** If your computer lags while recording, you can set ```rtabmap_viz:=false``` in Step 2 Terminal 2 to save CPU power.
+2. When ```ros2: command not found``` error is encountered, source the ROS 2 installation by executing ```source /opt/ros/humble/setup.bash```.
+3. **SLAM Tracking:** Visual Odometry (SLAM) requires distinct 'features' to track. Avoid pointing the camera at blank white walls or dark corners, as this will cause the ```/rtabmap/odom``` topic to stop publishing.
+4. **Hardware Sync:** If frames are out of sync, ensure ```enable_sync:=true``` is set in Terminal 1.
+5. **Note on Performance:** If your computer lags while recording, you can set ```rtabmap_viz:=false``` in Step 2 Terminal 2 to save CPU power.
 
 ## To Include IMU data:
 
