@@ -125,7 +125,12 @@ ros2 bag info my_realsense_session
 ```
 To start the visualzer (without the camera):
 ```bash
-ros2 run rtabmap_viz rtabmap_viz --ros-args -r rgb/image:=/camera/camera/color/image_raw -r depth/image:=/camera/camera/aligned_depth_to_color/image_raw -r rgb/camera_info:=/camera/camera/color/camera_info
+ros2 launch rtabmap_launch rtabmap.launch.py \
+    use_sim_time:=true \
+    rgb_topic:=/camera/camera/color/image_raw \
+    depth_topic:=/camera/camera/aligned_depth_to_color/image_raw \
+    camera_info_topic:=/camera/camera/color/camera_info \
+    rtabmap_viz:=true
 ```
 **Terminal 2:**
 To play back the data: You can replay this session exactly as it happened without the camera plugged in.
