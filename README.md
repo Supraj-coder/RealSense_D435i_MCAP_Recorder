@@ -175,7 +175,7 @@ ros2 bag play my_realsense_session
 
 ## To Include IMU data:
 
-**Update the commands of step 2 terminals 1 and 3 as shown below**
+**Update the commands of step 2 as shown below**
 
 + Terminal 1
 
@@ -189,6 +189,22 @@ ros2 launch realsense2_camera rs_launch.py \
   rgb_camera.profile:=640x480x30 \
   depth_module.profile:=640x480x30 \
   enable_sync:=true
+```
+
++ Terminal 2
+Set ```wait_imu_to_init:=true``` to ensure that the SLAM orientation is initialized by gravity, making the map "upright."
+
+```bash
+ros2 launch rtabmap_launch rtabmap.launch.py \
+    rtabmap_args:="--delete_db_on_start" \
+    rgb_topic:=/camera/camera/color/image_raw \
+    depth_topic:=/camera/camera/aligned_depth_to_color/image_raw \
+    camera_info_topic:=/camera/camera/color/camera_info \
+    frame_id:=camera_link \
+    approx_sync:=true \
+    approx_sync_max_interval:=0.05 \
+    wait_imu_to_init:=true \
+    rtabmap_viz:=true
 ```
 
 + Terminal 3
@@ -205,3 +221,6 @@ ros2 launch realsense2_camera rs_launch.py \
   /tf_static \
   -o my_realsense_session
 ```
+
+**Note**
+If any issues are encountered regarding "Topic not found", then verify the required topic name using the ```bash ros2 topic list``` command.
