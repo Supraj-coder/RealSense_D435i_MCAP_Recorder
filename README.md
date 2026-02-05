@@ -37,7 +37,9 @@ sudo apt install -y \
   ros-humble-rtabmap-ros \
   ros-humble-rosbag2-storage-mcap \
   librealsense2-utils \
-  librealsense2-dkms
+  librealsense2-dkms \
+  ros-humble-cv-bridge \
+  ros-humble-image-transport-plugins
 ```
 
 <br>  
@@ -72,7 +74,8 @@ ros2 launch realsense2_camera rs_launch.py \
 ```
 <br> 
 
-**Terminal 2: Start SLAM (Visual Odometry)**
+**Terminal 2: Start SLAM (Visual Odometry) and Line Verification**
+
 This generates the 3D trajectory (position and orientation) in the world frame.
 ```bash
 ros2 launch rtabmap_launch rtabmap.launch.py \
@@ -82,9 +85,14 @@ ros2 launch rtabmap_launch rtabmap.launch.py \
     camera_info_topic:=/camera/camera/color/camera_info \
     frame_id:=camera_link \
     approx_sync:=true \
+    approx_sync_max_interval:=0.05 \
     wait_imu_to_init:=false \
     rtabmap_viz:=true
 ```
+When you run the command above, a window titled RTAB-Map Viz will open.
+- **Green flashes:** Indicate a successful "Loop Closure" (the system recognizes a place it has seen before).
+- **3D Map:** You should see a point cloud forming as you move. If the cloud stops updating, the recording will be missing trajectory data.
+- **Odometry:** If the screen turns RED, it means "Tracking Lost." Stop moving and point the camera back at a previous location to recover.
 
 <br>  
 
@@ -110,10 +118,16 @@ The data is saved as a folder named ```my_realsense_session```.
 
 <br>  
 
+**Terminal 1:**
 To check message counts and health:
 ```bash
 ros2 bag info my_realsense_session
 ```
+To start the visualzer (without the camera):
+```bash
+ros2 run rtabmap_viz rtabmap_viz --ros-args -r rgb/image:=/camera/camera/color/image_raw -r depth/image:=/camera/camera/aligned_depth_to_color/image_raw -r rgb/camera_info:=/camera/camera/color/camera_info
+```
+**Terminal 2:**
 To play back the data: You can replay this session exactly as it happened without the camera plugged in.
 ```bash
 ros2 bag play my_realsense_session
@@ -123,5 +137,6 @@ ros2 bag play my_realsense_session
 ## Important Troubleshooting
 
 1. **USB 3.0 Requirement:** The D435i requires a high-bandwidth USB 3.0 port. Use ```rs-enumerate-devices``` to confirm "USB Type" is 3.2.
-2. **SLAM Tracking:** If the ```/rtabmap/odom``` topic stops sending data (Lost Tracking), move the camera slowly in a well-lit area with plenty of visual features (avoid white walls).
+2. **SLAM Tracking:** Visual Odometry (SLAM) requires distinct 'features' to track. Avoid pointing the camera at blank white walls or dark corners, as this will cause the ```/rtabmap/odom``` topic to stop publishing.
 3. **Hardware Sync:** If frames are out of sync, ensure ```enable_sync:=true``` is set in Terminal 1.
+4. **Note on Performance:** If your computer lags while recording, you can set ```rtabmap_viz:=false``` in Step 2 Terminal 2 to save CPU power.
