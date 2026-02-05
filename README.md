@@ -3,6 +3,8 @@ Record data from the Realsense D435i camera into a .MCAP file using ROS2
 
 This guide provides a workflow to install, run, and record synchronized RGB-D data and 3D trajectories from an Intel RealSense D435i into a high-performance MCAP file.
 
+<br>
+
 ## 1. Prerequisites & Installation:
 These commands were tested on a Ubuntu 22.04 system with ROS 2 Humble installed.
 
@@ -41,6 +43,31 @@ sudo apt install -y \
   ros-humble-cv-bridge \
   ros-humble-image-transport-plugins
 ```
+
+**Note on ```librealsense2-dkms``` Errors**
+
+While installing dependencies, you may encounter an error message regarding ```librealsense2-dkms``` (e.g., ```exit status 10``` or ```BUILD_EXCLUSIVE``` directive).
+
++ **When to Ignore:** If the installation finishes with an error but you can still run realsense-viewer and see the camera feed, you can safely ignore the error. Modern Ubuntu kernels (especially 6.2+) often have built-in support for RealSense cameras, making the DKMS patch redundant.
++ **The libuvc Workaround:** If your camera is not detected at all and the DKMS installation continues to fail, use the **libuvc backend**. This method bypasses the Linux kernel entirely and works via standard USB protocols.
+
+<br>  
+
+**Using the libuvc Backend**
+If you cannot get the standard drivers to work, you can build ```librealsense``` from source using the provided Intel script:
+
+```bash
+# Clone the repository
+git clone https://github.com/IntelRealSense/librealsense.git
+cd librealsense/scripts
+
+# Run the libuvc installation script
+./libuvc_installation.sh
+```
+This script will compile the SDK in a mode that does not require kernel patches, ma
+king it compatible with almost any Linux kernel version.
+
+##
 
 <br>  
 
@@ -145,3 +172,36 @@ ros2 bag play my_realsense_session
 2. **SLAM Tracking:** Visual Odometry (SLAM) requires distinct 'features' to track. Avoid pointing the camera at blank white walls or dark corners, as this will cause the ```/rtabmap/odom``` topic to stop publishing.
 3. **Hardware Sync:** If frames are out of sync, ensure ```enable_sync:=true``` is set in Terminal 1.
 4. **Note on Performance:** If your computer lags while recording, you can set ```rtabmap_viz:=false``` in Step 2 Terminal 2 to save CPU power.
+
+## To Include IMU data:
+
+**Update the commands of step 2 terminals 1 and 3 as shown below**
+
++ Terminal 1
+
+```bash
+ros2 launch realsense2_camera rs_launch.py \
+  initial_reset:=true \
+  align_depth.enable:=true \
+  enable_accel:=true \
+  enable_gyro:=true \
+  unite_imu_method:=2 \
+  rgb_camera.profile:=640x480x30 \
+  depth_module.profile:=640x480x30 \
+  enable_sync:=true
+```
+
++ Terminal 3
+
+```bash
+  ros2 bag record -s mcap \
+  --storage-config-file <(echo "compression: 'Zstd'") \
+  /camera/camera/color/image_raw \
+  /camera/camera/aligned_depth_to_color/image_raw \
+  /camera/camera/color/camera_info \
+  /camera/camera/imu \
+  /rtabmap/odom \
+  /tf \
+  /tf_static \
+  -o my_realsense_session
+```
